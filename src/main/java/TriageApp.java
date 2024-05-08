@@ -1,0 +1,106 @@
+import java.io.File;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
+
+public class TriageApp {
+  private Triage triage = new Triage();
+  Scanner input = new Scanner(System.in);
+
+  private void insertPatient() {
+    System.out.println("\033[H\033[2J");
+    System.out.print("Inserisci il nome: ");
+    String nome = input.nextLine();
+
+    System.out.print("Inserisci il cognome: ");
+    String cognome = input.nextLine();
+
+    System.out.print("Inserisci i sintomi: ");
+    String sintomi = input.nextLine();
+
+    System.out.print("Inserisci la gravità: ");
+    String gravita = input.nextLine();
+    Severity severity;
+    if (gravita.equalsIgnoreCase("verde"))
+      severity = Severity.GREEN;
+    else if (gravita.equalsIgnoreCase("giallo"))
+      severity = Severity.YELLOW;
+    else if (gravita.equalsIgnoreCase("rosso"))
+      severity = Severity.RED;
+    else
+      throw new TriageException("Severity non valida");
+
+    Patient p = new Patient(nome, cognome, sintomi, severity);
+    triage.enqueue(p);
+  }
+
+  public void mainMenu() {
+
+    boolean exit = false;
+
+    while (!exit) {
+
+      System.out.println("\033[H\033[2J");
+      System.out.println(
+          "Menu: \n1- Aggiungi un paziente alla coda \n2- Rimuovi il prossimo paziente \n3- Scarica coda \n4- Carica coda \n0- Exit");
+
+      String number = input.nextLine();
+
+      switch(number) {
+        case "0" -> {
+          exit = true;
+        }
+        case "1" -> {
+          insertPatient();
+        }
+        case "2" -> {
+          System.out.println(triage.dequeue());
+          System.out.print("Premere invio per tornare al menù principale");
+          input.nextLine();
+        }
+        case "3" -> {
+          save();
+        }
+        case "4" -> {
+          load();
+        }
+        default -> {
+          System.out.println("Comando non riconosciuto\n\nPremere invio per tornare al menù principale");
+          input.nextLine();
+        }
+      }
+    }
+  }
+
+  private void save() {
+    String filePath = "queue.txt";
+
+    try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
+      for (int i = 0; i < triage.size(); i++) {
+        pw.println(triage.get(i).getName() + " " + triage.get(i).getLname() + " " + triage.get(i).getSymtoms() + " "
+            + triage.get(i).getSeverity());
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void load() {
+    System.out.println("\033[H\033[2J");
+    String filePath = "queue.txt";
+    try (Scanner sc = new Scanner(new File(filePath))) {
+      while (sc.hasNextLine()) {
+        String line = sc.nextLine();
+        System.out.println(line);
+      }
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+    System.out.print("Premere invio per tornare al menù principale");
+    input.nextLine();
+  }
+
+}

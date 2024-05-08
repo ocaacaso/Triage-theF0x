@@ -1,7 +1,7 @@
 public class Triage {
-  private Queue red;
-  private Queue green;
-  private Queue yellow;
+  private Queue red = new Queue();
+  private Queue green = new Queue();
+  private Queue yellow = new Queue();
 
   public void enqueue(Patient p) {
     if (p.getSeverity() == Severity.RED) {
