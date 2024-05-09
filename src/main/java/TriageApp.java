@@ -9,6 +9,20 @@ public class TriageApp {
   private Triage triage = new Triage();
   Scanner input = new Scanner(System.in);
 
+  private Severity severitySelector(String s) {
+     Severity severity;
+      if (s.equalsIgnoreCase("verde") || s.equalsIgnoreCase("green"))
+        severity = Severity.GREEN;
+      else if (s.equalsIgnoreCase("giallo") || s.equalsIgnoreCase("yellow"))
+        severity = Severity.YELLOW;
+      else if (s.equalsIgnoreCase("rosso") || s.equalsIgnoreCase("red"))
+        severity = Severity.RED;
+      else
+        throw new TriageException("Severity non valida");
+
+    return severity;
+  }
+
   private void insertPatient() {
     System.out.println("\033[H\033[2J");
     System.out.print("Inserisci il nome: ");
@@ -22,17 +36,8 @@ public class TriageApp {
 
     System.out.print("Inserisci la gravità: ");
     String gravita = input.nextLine();
-    Severity severity;
-    if (gravita.equalsIgnoreCase("verde"))
-      severity = Severity.GREEN;
-    else if (gravita.equalsIgnoreCase("giallo"))
-      severity = Severity.YELLOW;
-    else if (gravita.equalsIgnoreCase("rosso"))
-      severity = Severity.RED;
-    else
-      throw new TriageException("Severity non valida");
 
-    Patient p = new Patient(nome, cognome, sintomi, severity);
+    Patient p = new Patient(nome, cognome, sintomi, severitySelector(gravita));
     triage.enqueue(p);
   }
 
@@ -44,7 +49,7 @@ public class TriageApp {
 
       System.out.println("\033[H\033[2J");
       System.out.println(
-          "Menu: \n1- Aggiungi un paziente alla coda \n2- Rimuovi il prossimo paziente \n3- Scarica coda \n4- Carica coda \n0- Exit");
+          "Menu: \n1- Aggiungi un paziente alla coda \n2- Rimuovi il prossimo paziente \n3- Scarica coda \n4- Carica coda \n5- Stampa coda \n0- Exit");
 
       String number = input.nextLine();
 
@@ -66,6 +71,13 @@ public class TriageApp {
         case "4" -> {
           load();
         }
+        case "5" -> {
+          for (int i = 0; i < triage.size(); i++) {
+            System.out.println(triage.get(i));
+          }
+          System.out.print("Premere invio per tornare al menù principale");
+          input.nextLine();
+        }
         default -> {
           System.out.println("Comando non riconosciuto\n\nPremere invio per tornare al menù principale");
           input.nextLine();
@@ -79,7 +91,7 @@ public class TriageApp {
 
     try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
       for (int i = 0; i < triage.size(); i++) {
-        pw.println(triage.get(i).getName() + " " + triage.get(i).getLname() + " " + triage.get(i).getSymtoms() + " "
+        pw.println(triage.get(i).getName() + ";" + triage.get(i).getLname() + ";" + triage.get(i).getSymtoms() + ";"
             + triage.get(i).getSeverity());
       }
     } catch (IOException e) {
@@ -87,7 +99,7 @@ public class TriageApp {
     }
   }
 
-  private void load() {
+/*   private void load() {
     System.out.println("\033[H\033[2J");
     String filePath = "queue.txt";
     try (Scanner sc = new Scanner(new File(filePath))) {
@@ -101,6 +113,25 @@ public class TriageApp {
     }
     System.out.print("Premere invio per tornare al menù principale");
     input.nextLine();
-  }
+  } */
 
+
+  private void load() {
+    System.out.println("\033[H\033[2J");
+    String filePath = "queue.txt";
+    try (Scanner sc = new Scanner(new File(filePath))) {
+      while (sc.hasNextLine()) {
+        String line = sc.nextLine();
+        String[] split = line.split(";");
+        Patient p = new Patient (split[0], split[1], split[2], severitySelector(split[3]));
+        triage.enqueue(p);
+      }
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+    System.out.print("Premere invio per tornare al menù principale");
+    input.nextLine();
+  }
+  
 }

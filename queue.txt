@@ -1,1 +1,3 @@
-Filippo Fossa caio RED
+Filippo;Fossa;coma;RED
+Gabriele;Fiorucci;appendicite;YELLOW
+Daniel;Kapllani;slogatura;GREEN
